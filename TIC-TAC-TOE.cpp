@@ -71,9 +71,11 @@ int evaluate() {
 }
 
 // Minimax (Hard AI)
-int minimax(bool isMax) {
+int minimax(bool isMax, int depth) {
     int score = evaluate();
-    if (score == 10 || score == -10) return score;
+
+    if (score == 10) return score - depth;   // AI prefers faster win
+    if (score == -10) return score + depth; // AI delays losing
     if (!isMovesLeft()) return 0;
 
     if (isMax) {
@@ -82,7 +84,7 @@ int minimax(bool isMax) {
             for (int j = 0; j < 3; j++) {
                 if (board[i][j] == ' ') {
                     board[i][j] = 'O';
-                    best = max(best, minimax(false));
+                    best = max(best, minimax(false, depth + 1));
                     board[i][j] = ' ';
                 }
             }
@@ -94,7 +96,7 @@ int minimax(bool isMax) {
             for (int j = 0; j < 3; j++) {
                 if (board[i][j] == ' ') {
                     board[i][j] = 'X';
-                    best = min(best, minimax(true));
+                    best = min(best, minimax(true, depth + 1));
                     board[i][j] = ' ';
                 }
             }
@@ -120,7 +122,7 @@ void bestMove() {
         for (int j = 0; j < 3; j++) {
             if (board[i][j] == ' ') {
                 board[i][j] = 'O';
-                int moveVal = minimax(false);
+                int moveVal = minimax(false, 0);
                 board[i][j] = ' ';
                 if (moveVal > bestVal) {
                     bestVal = moveVal;
@@ -135,13 +137,20 @@ void bestMove() {
 
 // AI move based on difficulty
 void aiMove() {
-    if (difficulty == 1)
-        randomMove();
-    else if (difficulty == 2)
-        (rand() % 2 == 0) ? randomMove() : bestMove();
-    else
-        bestMove();
+    if (difficulty == 1) {
+        randomMove(); // Easy
+    }
+    else if (difficulty == 2) {
+        if (rand() % 10 < 8)   // 80% smart
+            bestMove();
+        else
+            randomMove();
+    }
+    else {
+        bestMove(); // Hard (pure minimax)
+    }
 }
+
 
 int main() {
     srand(time(0));
@@ -204,4 +213,5 @@ int main() {
 
     return 0;
 }
+
 
